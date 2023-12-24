@@ -1,0 +1,30 @@
+extensions:
+  customauth:
+    shared_key: romain
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        include_metadata: true
+        auth:
+          authenticator: customauth
+
+exporters:
+  debug:
+    verbosity: detailed
+
+processors:
+  attributes:
+    actions:
+      - key: http.client_ip
+        from_context: X-Forwarded-For
+        action: upsert
+
+service:
+  extensions: [customauth]
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: []
+      exporters: [debug]
